@@ -159,6 +159,7 @@ class Info(commands.Cog):
         embed.add_field(name="Guilds", value=str(total_guilds), inline=True)
         embed.add_field(name="Channels", value=str(total_channels), inline=True)
         embed.add_field(name="Known Users", value=str(len(known_users)), inline=True)
+        embed.add_field(name="Privacy Policy", value="[Click Here](https://augystudios.com/privacy)", inline=False)
 
         # If the user is the bot owner, provide buttons to list users, channels, or guilds
         if interaction.user.id == BOT_OWNER_ID:

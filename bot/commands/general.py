@@ -73,6 +73,7 @@ class General(commands.Cog):
         embed.add_field(name="Support the Bot", value=f"[Buy me a coffee!]({link_to_coffee})")
         link_to_monthly_support = "https://donate.stripe.com/6oEbKUdwn9FTgCI7st"
         embed.add_field(name="Monthly Support", value=f"[Support us monthly!]({link_to_monthly_support})")
+        embed.add_field(name="Privacy Policy", value="[Click Here](https://augystudios.com/privacy)", inline=False)
         embed.set_footer(text="Made with ❤️ by Augy Studios © 2025 All Rights Sniffed • https://augystudios.com/")
         await interaction.response.send_message(embed=embed)
         await log_action(self.bot, interaction)

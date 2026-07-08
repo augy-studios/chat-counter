@@ -117,7 +117,6 @@ def generate_word_id():
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
-intents.members = True
 bot = commands.AutoShardedBot(
     command_prefix="!",
     intents=intents,

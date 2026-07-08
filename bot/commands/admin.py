@@ -6,7 +6,6 @@ import os
 import random
 import re
 import sys
-import csv
 from datetime import datetime
 
 from bs4 import BeautifulSoup
@@ -18,6 +17,7 @@ import psutil
 from discord.ext import commands
 from discord import app_commands
 from core.logger import log_action
+import db
 
 class EvalPager(discord.ui.View):
     def __init__(self, pages):
@@ -253,23 +253,20 @@ class Admin(commands.Cog):
 
     @dev.command(
         name="sessions",
-        description="Display session data from sessions.csv"
+        description="Display session data"
     )
     @app_commands.check(lambda inter: inter.user.id == BOT_OWNER_ID)
     async def sessions(self, interaction: discord.Interaction):
         """Usage: /dev sessions"""
         try:
-            # load all sessions
             sessions = []
-            with open("sessions.csv", "r", encoding="utf-8") as csvfile:
-                reader = csv.DictReader(csvfile)
-                for row in reader:
-                    ts = int(datetime.fromisoformat(row["datetime_now"]).timestamp())
-                    sessions.append({
-                        "id": row["id"],
-                        "session_id": row["session_id"],
-                        "timestamp": f"<t:{ts}:F>"
-                    })
+            for row in db.get_all_sessions():
+                ts = int(datetime.fromisoformat(row["datetime_now"]).timestamp())
+                sessions.append({
+                    "id": row["id"],
+                    "session_id": row["session_id"],
+                    "timestamp": f"<t:{ts}:F>"
+                })
 
             if not sessions:
                 return await interaction.response.send_message("No session data found.", ephemeral=True)
@@ -280,8 +277,6 @@ class Admin(commands.Cog):
             first_embed = pager._make_embed()
 
             await interaction.response.send_message(embed=first_embed, view=pager, ephemeral=True)
-        except FileNotFoundError:
-            await interaction.response.send_message("❌ `sessions.csv` file not found.", ephemeral=True)
         except Exception as e:
             await interaction.response.send_message(f"❌ Error: {e}", ephemeral=True)
         await log_action(self.bot, interaction)

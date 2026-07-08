@@ -1,5 +1,3 @@
-import csv
-import os
 import datetime
 from zoneinfo import ZoneInfo
 from typing import Optional
@@ -11,7 +9,6 @@ from discord.ext import commands
 from config import BOT_OWNER_ID, LOG_GUILD_ID
 from core.logger import log_action
 from shared import stats, words_stats
-from main import WORDS_FILE
 
 # Pagination view for dump command
 class DumpView(discord.ui.View):
@@ -301,35 +298,12 @@ class Stats(commands.Cog):
     @app_commands.describe(user="User to view, defaults to yourself")
     async def topwords_user(self, interaction: discord.Interaction, user: Optional[discord.User] = None):
         await interaction.response.defer(thinking=True)
-        target = user or interaction.user
-        totals = {}
-        if not os.path.exists(WORDS_FILE):
-            await interaction.followup.send("Word data file not found.")
-            return
-        with open(WORDS_FILE, newline='', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row.get('user_id') != str(target.id):
-                    continue
-                word = row.get('word', '').lower()
-                try:
-                    count = int(row.get('count', '0'))
-                except ValueError:
-                    continue
-                totals[word] = totals.get(word, 0) + count
-        if not totals:
-            await interaction.followup.send(f"No word data for user {target.name}.")
-            return
-        top = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)[:10]
-        embed = discord.Embed(
-            title=f"🔤 Top 10 Words for {target.name}",
-            description="Most frequently used words by this user",
-            color=discord.Color.random(),
-            timestamp=datetime.datetime.now(ZoneInfo("Asia/Singapore"))
+        # Word usage is only tracked in aggregate per guild, not per user,
+        # so per-user word breakdowns aren't available.
+        await interaction.followup.send(
+            f"Per-user word tracking isn't available; word stats are only tracked per server, not per user. "
+            f"Try `/topwords guild` or `/topwords overall` instead."
         )
-        for rank, (word, count) in enumerate(top, start=1):
-            embed.add_field(name=f"{rank}. {word}", value=f"{count} uses", inline=False)
-        await interaction.followup.send(embed=embed)
         await log_action(self.bot, interaction)
 
     # ===== Word Stats Commands =====

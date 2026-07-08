@@ -5,7 +5,7 @@ import platform
 import random
 from core.logger import log_action
 from config import BOT_OWNER_ID
-from user_utils import ensure_users_file, get_known_users
+from user_utils import get_known_users
 
 # Function to split long messages into pages
 def paginate_list(items, title):
@@ -132,8 +132,7 @@ class Info(commands.Cog):
 
     @app_commands.command(name="botinfo", description="Get detailed bot information.")
     async def botinfo(self, interaction: discord.Interaction):
-        ensure_users_file()  # Make sure the users.txt file is checked/created
-        known_users = get_known_users()  # Get users from users.txt
+        known_users = get_known_users()
         total_channels = sum(len(guild.channels) for guild in self.bot.guilds)
         total_guilds = len(self.bot.guilds)
         

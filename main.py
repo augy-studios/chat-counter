@@ -114,8 +114,10 @@ db.add_session(session_id, datetime.datetime.now().isoformat())
 # ----- Activity updater -----
 async def update_activity():
     # set a custom status with an emoji
+    guild_count = len(bot.guilds)
+    plural = "guild" if guild_count == 1 else "guilds"
     await bot.change_presence(
-        activity=discord.CustomActivity(name=f"Hello, chat! (Session ID: {session_id})", emoji=":wave:")
+        activity=discord.CustomActivity(name=f"Counting messages in {guild_count} {plural} (Session ID: {session_id})", emoji=":100:")
     )
 
 # ----- Load extensions, events, etc. -----

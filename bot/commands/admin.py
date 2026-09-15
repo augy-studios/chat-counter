@@ -1,4 +1,6 @@
+import ast
 import asyncio
+import inspect
 import time
 import datetime
 import json
@@ -221,33 +223,41 @@ class Admin(commands.Cog):
             'psutil': psutil, 'time': time, 'random': random, 'json': json, 'datetime': datetime,
             're': re, 'requests': requests, 'BeautifulSoup': BeautifulSoup, 'lxml': lxml,
         }
-        # Prepare environment
-        env = {'bot': self.bot, 'discord': discord, 'commands': commands}
+        # Prepare environment. Used as globals (not locals) so lambdas and
+        # comprehensions inside the snippet can see these names.
+        env = {'__builtins__': {}, 'bot': self.bot, 'interaction': interaction}
         env.update(safe_builtins)
 
+        # Awaited calls may take longer than the 3s interaction window
+        await interaction.response.defer(ephemeral=True)
+
         body = code.strip('` ')
+        flags = ast.PyCF_ALLOW_TOP_LEVEL_AWAIT
         try:
-            # Try single expression
-            result = eval(body, {'__builtins__': {}}, env)
-        except SyntaxError:
-            # Try block execution
-            exec_env = env.copy()
             try:
-                exec(body, {'__builtins__': {}}, exec_env)
-                result = exec_env
-            except Exception as e:
-                return await interaction.response.send_message(f"❌ Error: {e}", ephemeral=True)
+                # Try single expression (allows top-level `await`)
+                compiled = compile(body, '<eval>', 'eval', flags=flags)
+                is_expr = True
+            except SyntaxError:
+                # Fall back to block execution; assign to `result` to return a value
+                compiled = compile(body, '<exec>', 'exec', flags=flags)
+                is_expr = False
+            result = eval(compiled, env)
+            if inspect.isawaitable(result):
+                result = await result
+            if not is_expr:
+                result = env.get('result', 'OK')
         except Exception as e:
-            return await interaction.response.send_message(f"❌ Error: {e}", ephemeral=True)
+            return await interaction.followup.send(f"❌ Error: {type(e).__name__}: {e}", ephemeral=True)
 
         output = str(result)
         # If output is long, split into pages with buttons
         if len(output) > 1024:
             pages = [output[i:i+1024] for i in range(0, len(output), 1024)]
             view = EvalPager(pages)
-            await interaction.response.send_message(f"```py\n{pages[0]}\n```", view=view, ephemeral=True)
+            await interaction.followup.send(f"```py\n{pages[0]}\n```", view=view, ephemeral=True)
         else:
-            await interaction.response.send_message(f"```py\n{output}```", ephemeral=True)
+            await interaction.followup.send(f"```py\n{output}```", ephemeral=True)
 
         await log_action(self.bot, interaction)
 

@@ -10,6 +10,15 @@ from config import BOT_OWNER_ID, LOG_GUILD_ID
 from core.logger import log_action
 from shared import stats, words_stats
 
+# Discord rejects embed field names longer than 256 characters
+EMBED_FIELD_NAME_LIMIT = 256
+
+def word_field_name(rank: int, word: str) -> str:
+    name = f"{rank}. {word}"
+    if len(name) > EMBED_FIELD_NAME_LIMIT:
+        name = name[:EMBED_FIELD_NAME_LIMIT - 1] + "…"
+    return name
+
 # Pagination view for dump command
 class DumpView(discord.ui.View):
     def __init__(self, pages: list[discord.Embed]):
@@ -244,7 +253,7 @@ class Stats(commands.Cog):
             timestamp=datetime.datetime.now(ZoneInfo("Asia/Singapore"))
         )
         for rank, (word, count) in enumerate(top, start=1):
-            embed.add_field(name=f"{rank}. {word}", value=f"{count} uses", inline=False)
+            embed.add_field(name=word_field_name(rank, word), value=f"{count} uses", inline=False)
 
         await interaction.followup.send(embed=embed)
         await log_action(self.bot, interaction)
@@ -289,7 +298,7 @@ class Stats(commands.Cog):
             timestamp=datetime.datetime.now(ZoneInfo("Asia/Singapore"))
         )
         for rank, (word, count) in enumerate(top, start=1):
-            embed.add_field(name=f"{rank}. {word}", value=f"{count} uses", inline=False)
+            embed.add_field(name=word_field_name(rank, word), value=f"{count} uses", inline=False)
 
         await interaction.followup.send(embed=embed)
         await log_action(self.bot, interaction)
@@ -491,7 +500,7 @@ class Stats(commands.Cog):
             timestamp=datetime.datetime.now(ZoneInfo("Asia/Singapore"))
         )
         for rank, (word, count) in enumerate(top, start=1):
-            embed.add_field(name=f"{rank}. {word}", value=f"{count} uses", inline=False)
+            embed.add_field(name=word_field_name(rank, word), value=f"{count} uses", inline=False)
         await interaction.followup.send(embed=embed)
         await log_action(self.bot, interaction)
 
@@ -529,7 +538,7 @@ class Stats(commands.Cog):
             timestamp=datetime.datetime.now(ZoneInfo("Asia/Singapore"))
         )
         for rank, (word, count) in enumerate(top, start=1):
-            embed.add_field(name=f"{rank}. {word}", value=f"{count} uses", inline=False)
+            embed.add_field(name=word_field_name(rank, word), value=f"{count} uses", inline=False)
         await interaction.followup.send(embed=embed)
         await log_action(self.bot, interaction)
 
@@ -563,7 +572,7 @@ class Stats(commands.Cog):
             timestamp=datetime.datetime.now(ZoneInfo("Asia/Singapore"))
         )
         for rank, (word, count) in enumerate(top, start=1):
-            embed.add_field(name=f"{rank}. {word}", value=f"{count} uses", inline=False)
+            embed.add_field(name=word_field_name(rank, word), value=f"{count} uses", inline=False)
         await interaction.followup.send(embed=embed)
         await log_action(self.bot, interaction)
 
@@ -601,7 +610,7 @@ class Stats(commands.Cog):
             timestamp=datetime.datetime.now(ZoneInfo("Asia/Singapore"))
         )
         for rank, (word, count) in enumerate(top, start=1):
-            embed.add_field(name=f"{rank}. {word}", value=f"{count} uses", inline=False)
+            embed.add_field(name=word_field_name(rank, word), value=f"{count} uses", inline=False)
         await interaction.followup.send(embed=embed)
         await log_action(self.bot, interaction)
 
